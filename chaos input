@@ -66,7 +66,19 @@ const modifier = (text) => {
   
   const regex2 = /\[CLASS\]/gi;
   var modifiedText = modifiedText.replace(regex2, Pclass);
-  
+
+//support for hiding requested actions
+text = text || ""; //prevent error if text is undefined
+
+// handle input commands
+  const inputResult = input(text, state.variables || {});
+  text = inputResult.input;
+
+//skip the rest if input was a special command
+
+  if (!text.trim()) {
+   return { text: state.message || "" };
+}
 
   // First process AutoCards if needed
   text = AutoCards("input", text);
