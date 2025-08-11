@@ -9030,7 +9030,7 @@ if (!currSC.description) {
 }
   currSC.description += `Log ${state.turnCount} | ${state.heatlogs}`;
   }
-  if (currSC.description.length > 2000) {
+  if (currSC.description.length > 3000) {
 currSC.description = currSC.description.slice (-3000);
 log("Trimming currSC description to keep only recent logs");
 }
