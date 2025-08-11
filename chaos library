@@ -9016,12 +9016,23 @@ function storeCurrToSC() {
     `Current Heat: ${state.heat}\n` +
     `Current Temperature: ${state.storyTemperature}\n` +
     `Authors Note: ${state.authorsNoteStorage}`;
- // Add heatlogs to description
+ // initialize description 
+if (!currSC.description) {
+   currSC.description = '';
+}
+
+ // Add heatlogs to description only if its not empty
   if (state.heatlogs) {
-  currSC.description = `Log ${state.turnCount} | ${state.heatlogs}`;
+
+//ensure each new log starts on a new line
+ if (currSC.description !== '') {
+    currSC.description += '\n';
+}
+  currSC.description += `Log ${state.turnCount} | ${state.heatlogs}`;
   }
-  else {
-currSC.description = ''; // or leave as if
+  if (currSC.description.length > 2000) {
+currSC.description = currSC.description.slice (-2000);
+log("Trimming currSC description to keep only recent logs");
 }
 }
 
