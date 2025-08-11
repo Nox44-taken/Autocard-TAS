@@ -1,5 +1,5 @@
 /* === STORY ARC CONFIGURATION === */
-state.originalAuthorsNote = "" //Add your story's authors note here. This will allow the system to modify the authors note whiile preserving your current one. If you have a dynamically changing authors note, you can instead put a "state.variableName" here.
+state.originalAuthorsNote = "include events that the player is not aware of. this is a fantasy setting" //Add your story's authors note here. This will allow the system to modify the authors note whiile preserving your current one. If you have a dynamically changing authors note, you can instead put a "state.variableName" here.
 
 state.initialHeatValue = 0 //Increasing this will increase the chance of the temperature increasing in the first few moments of the story.
 state.initialTemperatureValue = 1 //Increasing this will increase the amount of conflict and tension in the initial sections of the story.
@@ -52,7 +52,8 @@ const conflictWords = ["attack", "stab", "destroy", "break", "steal", "ruin", "b
 
 const calmingWords = ["calm", "rest", "relax", "meditate", "sleep", "comfort", "hug", "smile", "forgive", "mend", "repair", "plant", "sing", "dance", "celebrate", "collaborate", "share", "give", "donate", "protect", "shelter", "trust", "hope", "dream", "revive", "eat", "drink", "balance", "cheer", "laugh", "play", "build", "bake", "craft", "cook", "empathize", "apologize", "befriend", "admire", "sympathize", "thank", "appreciate", "cherish", "love", "pet", "respect", "restore", "guide", "teach", "learn", "daydream", "wander", "explore", "discover", "reflect", "happy", "joy", "kind", "heal", "help", "assist"]
 
-retrieveCurrFromSC();
+  retrieveCurrFromSC();
+  
 const modifier = (text) => {
 
 //Allows user to enter [RACE] and/or [CLASS] to have script choose for them.
@@ -66,19 +67,19 @@ const modifier = (text) => {
   
   const regex2 = /\[CLASS\]/gi;
   var modifiedText = modifiedText.replace(regex2, Pclass);
+  
+  //support for hiding requested action
+  text = text || ""; // Prevent error if text is undefined
 
-//support for hiding requested actions
-text = text || ""; //prevent error if text is undefined
-
-// handle input commands
+  // === Handle input commands ===
   const inputResult = input(text, state.variables || {});
   text = inputResult.input;
 
-//skip the rest if input was a special command
-
+  // Skip the rest if the input was a special command (like @req)
   if (!text.trim()) {
-   return { text: state.message || "" };
-}
+    return { text: state.message || "" };
+  }
+  
 
   // First process AutoCards if needed
   text = AutoCards("input", text);
@@ -341,41 +342,50 @@ if (state.heat == undefined){
     }
   }
   state.authorsNoteStorage = state.memory.authorsNote
-storeCurrToSC();
- // === Initialize World and Personal Reputation ===
+ storeCurrToSC();
+  // === World Clock Initialization ===
+  if (!state.worldClock) state.worldClock = { year: 1454, month: 3, day: 27, hour: 7, minute: 0 };
+  if (!state.pendingMinutes) state.pendingMinutes = 0;
+
+  // === Initialize World and Personal Reputation ===
   initWorldReputation(state);
   initPersonalReputation(state);
+
+  // === DEBUG: Rep State on Init ===
+  if (typeof output !== "undefined") output.push("[DEBUG] Rep after init: " + JSON.stringify(state.reputation));
 
   // === Snapshot Before Changes ===
   const oldWorldRep = { ...state.factions };
   const oldPersonalRep = { ...state.reputation };
 
   // === Personal Reputation Parsing ===
-  const patterns = getPersonalReputationPatterns();
-  for (const pattern of patterns) {
-    if (pattern.regex.test(text)) {
-      for (const cat in pattern.changes) {
-        const oldValue = state.reputation[cat] || 0;
-        const delta = pattern.changes[cat];
+const patterns = getPersonalReputationPatterns();
+for (const pattern of patterns) {
+  if (pattern.regex.test(text)) {
+    for (const cat in pattern.changes) {
+      const oldValue = state.reputation[cat] || 0;
+      const delta = pattern.changes[cat];
 
-        const minRep = -100;
-        const maxRep = 100;
+      const minRep = -100;
+      const maxRep = 100;
 
-        let newValue = oldValue + delta;
-        newValue = Math.max(minRep, Math.min(maxRep, newValue));
+      let newValue = oldValue + delta;
+      newValue = Math.max(minRep, Math.min(maxRep, newValue));
 
-        state.reputation[cat] = newValue;
-      }
-      logPersonalRepChange(text, pattern.changes);
+      state.reputation[cat] = newValue;
     }
+    logPersonalRepChange(text, pattern.changes);
   }
+}
+
+
 
   // === Reputation Delta Tracking ===
   state.lastWorldReputationChange = trackReputationChanges(oldWorldRep, state.factions);
   state.lastPersonalReputationChange = trackReputationChanges(oldPersonalRep, state.reputation);
 
+
   // === Log interaction (for triggers/titles later)
-  state.lastInteraction = text.toLowerCase();
 
   return { text: modifiedText }
 };
@@ -403,6 +413,7 @@ ${requestText}
       variables
     };
   }
+ 
   return { input: text, variables };
 }
 
