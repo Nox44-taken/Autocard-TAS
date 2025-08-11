@@ -9017,8 +9017,12 @@ function storeCurrToSC() {
     `Current Temperature: ${state.storyTemperature}\n` +
     `Authors Note: ${state.authorsNoteStorage}`;
  // Add heatlogs to description
+  if (state.heatlogs) {
   currSC.description = `Log ${state.turnCount} | ${state.heatlogs}`;
-
+  }
+  else {
+currSC.description = ''; // or leave as if
+}
 }
 
 function retrieveCurrFromSC() {
