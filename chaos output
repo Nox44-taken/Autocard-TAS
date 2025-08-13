@@ -310,10 +310,15 @@ if (typeof pickHybridReaction === "undefined") {
   );
   checkHybridJobUnlocks(state.unlockedJobs, state);
 
-  // --- NPC Reactions ---
+    // --- NPC Reactions ---
   let reactionLine = "";
   const age = (state.ages?.player ?? 0);
   const style = state.narrationStyle || "classic";
+const pickLine = (narratStyle, style) => {
+  // narratStyle = descriptive tone, style = narration style like "classic"
+  return `Change the NPC reaction to ${narratStyle} tone using ${style} narration:`;
+};
+
 
 // --- Legendary/Unique Reactions (highest priority) ---
 if (
@@ -423,37 +428,6 @@ if (!reactionLine) {
   }
   else if (rep.Innocent >= 19) {
     reactionLine = pickLine(innocentPeakLines, style);
-  }
-}
-
-// --- Base Reputation Pair Reactions (if STILL none matched) ---
-if (!reactionLine) {
-  if (rep.Charmer >= 16 && rep.Dominant >= 13) {
-    reactionLine = pickLine(charmerDominantLines, style);
-  }
-  else if (rep.Honorable >= 15 && rep.Submissive >= 13) {
-    reactionLine = pickLine(honorableSubmissiveLines, style);
-  }
-  else if (rep.Rogue >= 15 && rep.Prankster >= 13) {
-    reactionLine = pickLine(roguePranksterLines, style);
-  }
-  else if (rep.Curious >= 15 && rep.Clever >= 13) {
-    reactionLine = pickLine(curiousCleverLines, style);
-  }
-  else if (rep.Innocent >= 15 && rep.Affectionate >= 14) {
-    reactionLine = pickLine(innocentAffectionateLines, style);
-  }
-  else if (rep.Mischievous >= 15 && rep.Playful >= 14) {
-    reactionLine = pickLine(mischievousPlayfulLines, style);
-  }
-  else if (rep.Brave >= 15 && rep.Defiant >= 14) {
-    reactionLine = pickLine(braveDefiantLines, style);
-  }
-  else if (rep.Clever >= 15 && rep.Defiant >= 13) {
-    reactionLine = pickLine(cleverDefiantLines, style);
-  }
-  else if (rep.Playful >= 15 && rep.Affectionate >= 13) {
-    reactionLine = pickLine(playfulAffectionateLines, style);
   }
 }
 
