@@ -161,7 +161,10 @@ const conflictWords = ["attack", "stab", "destroy", "break", "steal", "ruin", "b
 
 const calmingWords = ["calm", "rest", "relax", "meditate", "sleep", "comfort", "hug", "smile", "forgive", "mend", "repair", "plant", "sing", "dance", "celebrate", "collaborate", "share", "give", "donate", "protect", "shelter", "trust", "hope", "dream", "revive", "eat", "drink", "balance", "cheer", "laugh", "play", "build", "bake", "craft", "cook", "empathize", "apologize", "befriend", "admire", "sympathize", "thank", "appreciate", "cherish", "love", "pet", "respect", "restore", "guide", "teach", "learn", "daydream", "wander", "explore", "discover", "reflect", "happy", "joy", "kind"]
 
-retrieveCurrFromSC();
+  retrieveCurrFromSC();
+  log(
+  `Hour-Minute: ${String(state.worldClock.hour ?? 0).padStart(2, '0')}:` +
+  `${String(state.worldClock.minute ?? 0).padStart(2, '0')}`)
 const modifier = (text) => {
   // First process AutoCards
   text = AutoCards("output", text);
@@ -243,28 +246,52 @@ const modifier = (text) => {
   `Detected ${calmingCount} calming words (AI). Decreasing heat & temperature.\nDetected ${calmingCount} calming words (AI). Decreasing heat.\n`
   : '');
 state.heatlogs = heatlogs;
-   storeCurrToSC();
+  
 
- // === Reputation Tracking ===
+
+  // === World & Personal Reputation Init and DEBUG ===
+  initWorldReputation(state);
+  initPersonalReputation(state);
+
+ if (typeof output !== "undefined") output.push("[DEBUG] Output Modifier Start");
+if (typeof checkHybridJobUnlocks === "undefined") {
+  function checkHybridJobUnlocks() {}
+}
+if (typeof pickHybridReaction === "undefined") {
+  function pickHybridReaction() { return ""; }
+}
+
   const worldDelta = state.lastWorldReputationChange || {};
   const personalDelta = state.lastPersonalReputationChange || {};
   const rep = state.reputation || {};
   let changes = [];
 
-  // Check for changes
+  // --- Reputation Change Displays
   const worldChanged = Object.keys(worldDelta).length > 0;
   const personalChanged = Object.keys(personalDelta).length > 0;
 
-  // === World Reputation Changes ===
+  if (typeof output !== "undefined") output.push("[DEBUG] worldDelta: " + JSON.stringify(worldDelta));
+  if (typeof output !== "undefined") output.push("[DEBUG] personalDelta: " + JSON.stringify(personalDelta));
+  if (typeof output !== "undefined") output.push("[DEBUG] reputation: " + JSON.stringify(rep));
+
   if (worldChanged) {
     const worldChanges = Object.entries(worldDelta)
       .map(([faction, delta]) => `${faction} ${delta >= 0 ? "+" : ""}${delta}`)
       .join("  ");
     changes.push(`[World Reputation Change] ${worldChanges}`);
     changes.push(`[World Reputation] ${getReputationSummary(state)}`);
+    if (typeof output !== "undefined") output.push("[DEBUG] Pushed world rep changes.");
   }
 
-  // === Personal Reputation Changes ===
+  if (personalChanged) {
+    const personalChanges = Object.entries(personalDelta)
+      .map(([cat, delta]) => `${cat} ${delta >= 0 ? "+" : ""}${delta}`)
+      .join("  ");
+    changes.push(`[World Reputation Change] ${worldChanges}`);
+    changes.push(`[World Reputation] ${getReputationSummary(state)}`);
+    if (typeof output !== "undefined") output.push("[DEBUG] Pushed world rep changes.");
+  }
+
   if (personalChanged) {
     const personalChanges = Object.entries(personalDelta)
       .map(([cat, delta]) => `${cat} ${delta >= 0 ? "+" : ""}${delta}`)
@@ -274,7 +301,16 @@ state.heatlogs = heatlogs;
     changes.push(personalSummary);
   }
 
-   // --- NPC Reactions ---
+
+
+  state.unlockedJobs = checkJobUnlocks(
+    state.reputation,
+    state.storyFlags || {},
+    state.unlockedJobs || {}
+  );
+  checkHybridJobUnlocks(state.unlockedJobs, state);
+
+  // --- NPC Reactions ---
   let reactionLine = "";
   const age = (state.ages?.player ?? 0);
   const style = state.narrationStyle || "classic";
@@ -392,31 +428,31 @@ if (!reactionLine) {
 
 // --- Base Reputation Pair Reactions (if STILL none matched) ---
 if (!reactionLine) {
-  if (rep.Charmer >= 6 && rep.Dominant >= 3) {
+  if (rep.Charmer >= 16 && rep.Dominant >= 13) {
     reactionLine = pickLine(charmerDominantLines, style);
   }
-  else if (rep.Honorable >= 5 && rep.Submissive >= 3) {
+  else if (rep.Honorable >= 15 && rep.Submissive >= 13) {
     reactionLine = pickLine(honorableSubmissiveLines, style);
   }
-  else if (rep.Rogue >= 5 && rep.Prankster >= 3) {
+  else if (rep.Rogue >= 15 && rep.Prankster >= 13) {
     reactionLine = pickLine(roguePranksterLines, style);
   }
-  else if (rep.Curious >= 5 && rep.Clever >= 3) {
+  else if (rep.Curious >= 15 && rep.Clever >= 13) {
     reactionLine = pickLine(curiousCleverLines, style);
   }
-  else if (rep.Innocent >= 5 && rep.Affectionate >= 4) {
+  else if (rep.Innocent >= 15 && rep.Affectionate >= 14) {
     reactionLine = pickLine(innocentAffectionateLines, style);
   }
-  else if (rep.Mischievous >= 5 && rep.Playful >= 4) {
+  else if (rep.Mischievous >= 15 && rep.Playful >= 14) {
     reactionLine = pickLine(mischievousPlayfulLines, style);
   }
-  else if (rep.Brave >= 5 && rep.Defiant >= 4) {
+  else if (rep.Brave >= 15 && rep.Defiant >= 14) {
     reactionLine = pickLine(braveDefiantLines, style);
   }
-  else if (rep.Clever >= 5 && rep.Defiant >= 3) {
+  else if (rep.Clever >= 15 && rep.Defiant >= 13) {
     reactionLine = pickLine(cleverDefiantLines, style);
   }
-  else if (rep.Playful >= 5 && rep.Affectionate >= 3) {
+  else if (rep.Playful >= 15 && rep.Affectionate >= 13) {
     reactionLine = pickLine(playfulAffectionateLines, style);
   }
 }
@@ -426,6 +462,15 @@ if (!reactionLine) {
     text = `${reactionLine}\n\n${text}`;
     state.lastReactionLine = reactionLine;
   }
+
+  // --- Hybrid Job List to Output ---
+  const hybridList = Object.keys(state.hybridJobs || {})
+    .map(flag => HYBRID_JOBS.find(h => h.unlockFlag === flag)?.name)
+    .filter(Boolean);
+  if (hybridList.length) {
+    changes.push(`[Hybrid Jobs] ${hybridList.join(", ")}`);
+  }
+
   // --- Example: pick a reaction if Charmer or Prankster went up ---
   let lastChange = state.lastPersonalReputationChange || {};
   let phrase = "";
@@ -444,19 +489,39 @@ if (!reactionLine) {
     text = insertNPCReaction(text, phrase);
   }
 
-
-
-   // --- Clear rep deltas ---
+  // --- Clear rep deltas ---
   state.lastWorldReputationChange = {};
   state.lastPersonalReputationChange = {};
+  if (typeof output !== "undefined") output.push("[DEBUG] Cleared rep deltas.");
 
+  // --- Apply Auto-Cards ---
+  text = AutoCards("output", text); //<==🚨REMOVE IF NOT USING AUTO-CARDS!!🚨
+  if (typeof output !== "undefined") output.push("[DEBUG] AutoCards applied.");
+
+  // === Clock/Status Bar ===
+  let statusBar = "";
+  if (text && text.trim()) {
+    let clockString = typeof getClockString === "function"
+      ? getClockString()
+      : (globalThis.getClockString ? globalThis.getClockString() : "");
+    let minutesInfo = "";
+    if (typeof state !== "undefined" && state.lastActionMinutes !== undefined) {
+      minutesInfo = ` (Action took ${state.lastActionMinutes} minute${state.lastActionMinutes !== 1 ? "s" : ""})`;
+    }
+    if (clockString) statusBar = `[🕒 ${clockString}]${minutesInfo}\n`;
+  }
+
+  // --- Output DEBUG End ---
+  if (typeof output !== "undefined") output.push("[DEBUG] Output Modifier End");
 
   // --- Final output, stacking all pieces in order ---
-  let outText = text;
+  let outText = statusBar + text;
   if (changes.length > 0) outText = [outText, ...changes].join("\n\n");
-
+storeCurrToSC();
+log("Hour-Minute: " + String(state.worldClock.hour).padStart(2, '0') + ":" + String(state.worldClock.minute).padStart(2, '0'));
   return { text: outText };
 };
+
 
 // Don't modify this part
 modifier(text);
