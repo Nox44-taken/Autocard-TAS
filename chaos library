@@ -9017,13 +9017,13 @@ function storeCurrToSC() {
 
   // Format the heat, temperature, and author’s note info
   currSC.entry =
-    `World Clock:\n` +
+     `World Clock: ${state.statusBar || ""}\n` +
   `Year: ${state.worldClock.year}\n` +
   `Month-Day: ${String(state.worldClock.month).padStart(2, '0')}-${String(state.worldClock.day).padStart(2, '0')}\n` +
   `Hour-Minute: ${String(state.worldClock.hour).padStart(2, '0')}:${String(state.worldClock.minute).padStart(2, '0')}\n` +
-  `Current Heat: ${state.heat}\n` +
     `Current Heat: ${state.heat}\n` +
     `Current Temperature: ${state.storyTemperature}\n` +
+    `Current turn: ${state.turnNum_SAE}\n` +
     `Authors Note: ${state.authorsNoteStorage}`;
  // initialize description 
 if (!currSC.description) {
