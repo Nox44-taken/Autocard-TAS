@@ -489,7 +489,7 @@ if (!reactionLine) {
   if (typeof output !== "undefined") output.push("[DEBUG] Output Modifier End");
 
   // --- Final output, stacking all pieces in order ---
-  let outText = statusBar + text;
+  let outText = text;
   if (changes.length > 0) outText = [outText, ...changes].join("\n\n");
 storeCurrToSC();
 log("Hour-Minute: " + String(state.worldClock.hour).padStart(2, '0') + ":" + String(state.worldClock.minute).padStart(2, '0'));
