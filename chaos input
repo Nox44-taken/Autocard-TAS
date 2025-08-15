@@ -477,7 +477,7 @@ for (const pattern of patterns) {
   if (typeof output !== "undefined") output.push("[DEBUG] Input Modifier END");
 
   // === AutoCards (Input) ===
-  text = AutoCards("input", text);  //<==IF NOT USING AUTO-CARDS, REMOVE!!
+checkTimeOfDay();
  storeCurrToSC();
 // Don't modify this part
 log("Hour-Minute: " + String(state.worldClock.hour).padStart(2, '0') + ":" + String(state.worldClock.minute).padStart(2, '0'));
