@@ -12138,7 +12138,31 @@ if (!state.ages) state.ages = {
   // Add more as needed!
 };
 
+// Checks time of day and triggers morning/evening/night messages once per period
+function checkTimeOfDay() {
+  // Ensure state variables exist
+  if (typeof state.lastTimePeriod === "undefined") {
+    state.lastTimePeriod = null;
+  }
 
+  let hour = state.worldClock.hour;
+  let minute = state.worldClock.minute;
+
+  let timeOfDay, emoji;
+  if (hour >= 5 && hour < 12) {
+    timeOfDay = "morning";
+    emoji = "🌅"; // sunrise
+  } else if (hour >= 12 && hour < 18) {
+    timeOfDay = "evening";
+    emoji = "🌇"; // sunset
+  } else if (hour >= 0 && hour < 5) {
+    timeOfDay = "night";
+    emoji = "🌌"; // late night
+  } else {
+    timeOfDay = "night";
+    emoji = "🌙"; // early night
+  }
+}
 // Called on each new day, checks birthdays and advances ages
 function onNewDay() {
   let wc = state.worldClock;
