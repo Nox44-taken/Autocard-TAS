@@ -12141,8 +12141,13 @@ if (!state.ages) state.ages = {
 // Checks time of day and triggers morning/evening/night messages once per period
 function checkTimeOfDay() {
   // Ensure state variables exist
-  if (typeof state.lastTimePeriod === "undefined") {
-    state.lastTimePeriod = null;
+  if (typeof state.lastTimePeriod === "undefined") state.lastTimePeriod = null;
+  if (typeof state.lastCheckedDay === "undefined") state.lastCheckedDay = state.worldClock.day;
+
+  // Detect new day
+  if (state.worldClock.day !== state.lastCheckedDay) {
+    state.lastCheckedDay = state.worldClock.day;
+    state.lastTimePeriod = null; // reset so morning triggers
   }
 
   let hour = state.worldClock.hour;
