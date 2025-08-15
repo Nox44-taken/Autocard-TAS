@@ -12162,6 +12162,12 @@ function checkTimeOfDay() {
     timeOfDay = "night";
     emoji = "🌙"; // early night
   }
+  // Only trigger if the period changes
+  if (timeOfDay !== state.lastTimePeriod) {
+    state.lastTimePeriod = timeOfDay;
+    return `${emoji} It is now ${timeOfDay}. Current time: ${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
+  }
+  return "";
 }
 // Called on each new day, checks birthdays and advances ages
 function onNewDay() {
