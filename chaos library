@@ -6212,7 +6212,7 @@ function onOutput_TAS(text) {
 
 /////////////////////////////////////////////////////////////////////////////////////
 
-youWords = ["you", "You", "I", "nox", "Nox"];
+youWords = ["you", "You", "I" ];
 
 selfWords = ["me", "my", "myself", "mine", "your", "yourself", "yours", "us", "our", "ours", "ourselves", "himself", "his",
 ];
